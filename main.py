@@ -3,10 +3,38 @@ import os
 from datetime import datetime
 import discord
 from discord.ext import commands
-from abilities import apply_sqlite_migrations
+import sqlite3
 from sqlalchemy.orm import Session
 from web import keep_alive
 from models import Base, engine, UserPoints, RoleHierarchy, Session as SessionMaker
+
+def apply_migrations():
+    # Create migrations table if it doesn't exist
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS migrations
+                 (id INTEGER PRIMARY KEY, filename TEXT UNIQUE)''')
+    conn.commit()
+    
+    # Get list of applied migrations
+    c.execute('SELECT filename FROM migrations')
+    applied = set(row[0] for row in c.fetchall())
+    
+    # Get all migration files
+    migration_files = sorted([f for f in os.listdir('migrations') 
+                             if f.endswith('.sql') and not f.startswith('000')])
+    
+    # Apply new migrations
+    for filename in migration_files:
+        if filename not in applied:
+            print(f"Applying migration: {filename}")
+            with open(os.path.join('migrations', filename)) as f:
+                sql = f.read()
+                c.executescript(sql)
+                c.execute('INSERT INTO migrations (filename) VALUES (?)', (filename,))
+                conn.commit()
+    
+    conn.close()
 
 def generate_oauth_link(client_id):
     base_url = "https://discord.com/api/oauth2/authorize"
@@ -148,7 +176,7 @@ def on_ready():
     print("Bot invite link: {0}".format(generate_oauth_link(os.environ.get('CLIENT_ID'))))
 
 def main():
-    apply_sqlite_migrations(engine, Base, 'migrations')
+    apply_migrations()
     
     client_id = os.environ.get('CLIENT_ID')
     bot_token = os.environ.get('BOT_TOKEN')
