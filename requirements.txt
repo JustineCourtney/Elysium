@@ -1,0 +1,7 @@
+Flask
+SQLAlchemy
+discord.py==2.3.2
+flask
+gunicorn
+sqlalchemy==1.4.41
+werkzeug

@@ -1,0 +1,23 @@
+{
+  "name": "elysium-discord-bot",
+  "version": "1.0.0",
+  "description": "Discord bot for managing user points and roles",
+  "main": "main.py",
+  "scripts": {
+    "start": "python main.py"
+  },
+  "engines": {
+    "python": "3.8.x"
+  },
+  "keywords": [
+    "discord",
+    "bot",
+    "points",
+    "roles"
+  ],
+  "author": "Elysium Bot Developer",
+  "license": "ISC",
+  "glitch": {
+    "projectType": "python"
+  }
+}
